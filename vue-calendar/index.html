@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>vue-calendar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: '微软雅黑';
+      font-size: 14px;
+    }
+    ul li {
+      list-style: none;
+    }
+    #calendar {
+      margin: 20px auto;
+      width: 350px;
+      border-radius: 3px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    #calendar .header {
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      background: #1997fe;
+      color: #fff;
+      border-radius: 3px 3px 0 0;
+    }
+    #calendar .header .pre-btn {
+      display: block;
+      float: left;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+    #calendar .header .next-btn {
+      display: block;
+      float: right;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+    #calendar .title {
+      font-size: 0;
+      border-bottom: 1px solid #eee;
+    }
+    #calendar .title span {
+      font-size: 14px;
+      display: inline-block;
+      width: 50px;
+      text-align: center;
+      line-height: 30px;
+    }
+    #calendar .content {
+      overflow: hidden;
+    }
+    #calendar .content ul li {
+      display: block;
+      float: left;
+      width: 50px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    #calendar .content ul li:hover {
+      background: rgba(25, 151, 254, 0.4);
+      color: #fff;
+    }
+    #calendar .content ul li.today {
+      background: rgba(25, 151, 254, 0.4);
+      color: #fff;
+    }
+    #calendar .content ul li:nth-child(7n + 1), #calendar .content ul li:nth-child(7n) {
+      color: #1997fe;
+    }
+  </style>
+</head>
+<body>
+  <div id="calendar">
+    <div class="header">
+      <span class="pre-btn" @click="preMonth">上一月</span>
+      <span class="now-y-m">{{ nowYear}}/{{ formatNowMonth }}</span>
+      <span class="next-btn" @click="nextMonth">下一月</span>
+    </div>
+    <div class="title">
+      <span v-for="week in weeks">{{ week }}</span>
+    </div>
+    <div class="content">
+      <ul>
+          <li v-for="(day,index) in days" @click="showDate(day)" :class="{'today' : index === today}" :key="index">{{ day }}</li>
+      </ul>
+    </div>
+  </div>
+  <script src="vue.js"></script>
+  <script>
+    var calendar = new Vue({
+      el: '#calendar',
+      data: {
+          weeks: ['日', '一', '二', '三', '四', '五', '六'],
+          days: [],
+          nowMonth: null,
+          nowYear: null,
+          nowDate: null
+      },
+      computed: {
+        today: function() {
+          var date = new Date();
+          if (this.nowYear === date.getFullYear() && this.nowMonth === date.getMonth()) {
+            return (this.getFirstDay(this.nowYear, this.nowMonth) + this.nowDate - 1);
+          }
+          return false;
+        },
+        formatNowMonth: function() {
+          if (this.nowMonth < 9) {
+            return '0' + (this.nowMonth + 1);
+          }
+          return this.nowMonth + 1;
+        }
+      },
+      created() {
+        this.$nextTick(() => {
+          this.nowDate();
+          this.init();
+        })
+      },
+      methods: {
+        // 获取当月天数
+        getDates: function(year, month) {
+          var date = new Date(year, month+1, 0);
+          return date.getDate();
+        },
+        // 获取当月第一天是星期几
+        getFirstDay: function(year, month) {
+          var date = new Date();
+          var firstDay = new Date(year, month, 1);
+          return firstDay.getDay();
+        },
+        nowDate: function() {
+          var date = new Date();
+          this.nowYear = date.getFullYear();
+          this.nowMonth = date.getMonth();
+          this.nowDate = date.getDate();
+        },
+        init: function() {
+          this.days = [];
+          var date = new Date();
+          var dates = this.getDates(this.nowYear, this.nowMonth);
+          var firstDay = this.getFirstDay(this.nowYear, this.nowMonth);
+          var totalLength = 42;
+          if (firstDay != 0) {
+            for (let i = 0; i < firstDay; i++) {
+              this.days.push('');
+            }
+          }
+          for (let i = 0; i < dates; i++) {
+            this.days.push(i + 1);
+          }
+          var daysLength = this.days.length;
+          if (daysLength < totalLength) {
+            for (let i = 0; i < totalLength - daysLength; i++)
+            this.days.push('');
+          }
+        },
+        preMonth: function() {
+          if (this.nowMonth <= 0) {
+            this.nowYear -= 1;
+            this.nowMonth = 11;
+          } else {
+            this.nowMonth -= 1;
+          }
+          this.init();
+        },
+        nextMonth: function() {
+          if (this.nowMonth >= 11) {
+            this.nowYear += 1;
+            this.nowMonth = 0;
+          } else {
+            this.nowMonth += 1;
+          }
+          this.init();
+        },
+        showDate: function(day) {
+          if (day === '') {
+            return;
+          }
+          alert(this.nowYear + '-' + (this.nowMonth + 1)+ '-' +(day));
+        }
+      }
+    });
+  </script>
+</body>
+</html>
